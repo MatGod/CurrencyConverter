@@ -8,6 +8,8 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -73,19 +75,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Double toValue;
                 if (fromCurrencyField.getText().toString().equals(".")) {
                     fromCurrencyField.setText("0.");
                     fromCurrencyField.setSelection(2);
                 }
-                if (fromCurrencyField.getText().toString().length() == 0) {
-                    toValue = 0.0;
-                } else {
-                    toValue = Double.parseDouble(fromCurrencyField.getText().toString()) *
-                            mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
-                                    toSpinner.getSelectedItem().toString());
-                }
-                toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", toValue));
+                setToCurrencyValue();
             }
 
             @Override
@@ -93,6 +87,52 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        toCurrencyField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (toCurrencyField.getText().toString().equals(".")) {
+                    toCurrencyField.setText("0.");
+                    toCurrencyField.setSelection(2);
+                }
+                setFromCurrencyValue();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        toSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setToCurrencyValue();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        fromSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setToCurrencyValue();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         Market market1 = new Market("USD", "RUB", 1);
         Market market2 = new Market("RUB", "USD", 2);
 
@@ -108,5 +148,29 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("TAG", String.valueOf(markets.size()))
                         , Throwable::printStackTrace);
 
+    }
+
+    void setToCurrencyValue() {
+        Double toValue;
+        if (fromCurrencyField.getText().toString().length() == 0) {
+            toValue = 0.0;
+        } else {
+            toValue = Double.parseDouble(fromCurrencyField.getText().toString()) *
+                    mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
+                            toSpinner.getSelectedItem().toString());
+        }
+        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", toValue));
+    }
+
+    void setFromCurrencyValue() {
+        Double fromValue;
+        if (fromCurrencyField.getText().toString().length() == 0) {
+            fromValue = 0.0;
+        } else {
+            fromValue = Double.parseDouble(toCurrencyField.getText().toString()) *
+                    mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
+                            toSpinner.getSelectedItem().toString());
+        }
+        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", fromValue));
     }
 }
