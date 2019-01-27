@@ -8,21 +8,25 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+
 @Dao
 public interface MarketDao {
 
-    @Query("SELECT * FROM markets")
-    List<Market> getAll();
+    @Query("SELECT * FROM market")
+    Observable<List<Market>> getAll();
 
-    @Query("SELECT * FROM markets WHERE id = :id")
-    Market getById(long id);
+    @Query("SELECT * FROM market WHERE id = :id")
+    Observable<Market> getById(long id);
 
     @Insert
-    void insert(Market market);
+    Completable insert(Market market);
 
     @Update
-    void update(Market market);
+    Completable update(Market market);
 
     @Delete
-    void delete(Market market);
+    Completable delete(Market market);
+
 }

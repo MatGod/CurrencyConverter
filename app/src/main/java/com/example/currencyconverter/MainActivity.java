@@ -1,5 +1,6 @@
 package com.example.currencyconverter;
 
+import android.arch.persistence.room.Room;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -9,6 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import org.reactivestreams.Publisher;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -75,5 +80,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        Market market1 = new Market("USD", "RUB", 1);
+        Market market2 = new Market("RUB", "USD", 2);
+
+        MarketDao db =  Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database").build().marketDao();
+
+//        db.insert(market1).andThen(() -> {
+//            db.delete(market1)
+//        })
+
     }
 }

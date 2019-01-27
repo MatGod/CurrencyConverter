@@ -6,5 +6,5 @@ import android.arch.persistence.room.RoomDatabase;
 @Database(entities = { Market.class }, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
 
-//    public abstract
+    public abstract MarketDao marketDao();
 }
