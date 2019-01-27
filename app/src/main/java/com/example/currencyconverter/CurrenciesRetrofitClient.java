@@ -52,6 +52,7 @@ public class CurrenciesRetrofitClient {
 
             in.beginObject();
             while (in.hasNext()) {
+                in.nextName();
                 currencies.add(readCurrency(in));
             }
             in.endObject();
@@ -64,10 +65,21 @@ public class CurrenciesRetrofitClient {
 
             in.beginObject();
             while (in.hasNext()) {
+                in.nextName();
+                in.beginObject();
                 String name = in.nextName();
+                if (name.equals("currencyName")) {
+                    in.nextString();
+                    name = in.nextName();
+                }
+                if (name.equals("currencySymbol")) {
+                    in.nextString();
+                    name = in.nextName();
+                }
                 if (name.equals("id")) {
                     currency = in.nextString();
                 }
+                in.endObject();
             }
             in.endObject();
 

@@ -185,6 +185,6 @@ public class MainActivity extends AppCompatActivity {
                     mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
                             toSpinner.getSelectedItem().toString());
         }
-        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", fromValue));
+        //toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", fromValue));
     }
 }
