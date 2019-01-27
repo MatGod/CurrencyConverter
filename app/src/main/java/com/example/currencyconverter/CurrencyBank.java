@@ -3,6 +3,7 @@ package com.example.currencyconverter;
 import java.util.ArrayList;
 
 public class CurrencyBank {
+
     private ArrayList<String> mCurrenciesNames;
     private Double[][] mExchangeRates;
 

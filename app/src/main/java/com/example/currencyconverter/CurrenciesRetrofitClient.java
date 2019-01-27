@@ -1,9 +1,7 @@
 package com.example.currencyconverter;
 
-import android.support.annotation.RequiresPermission;
+import android.util.Pair;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -24,7 +22,7 @@ public class CurrenciesRetrofitClient {
                 .build();
     }
 
-    static class CurrencyTypeAdapter extends TypeAdapter<ArrayList<String>> {
+    static class CurrencyListAdapter extends TypeAdapter<ArrayList<String>> {
 
         @Override
         public void write(JsonWriter out, ArrayList<String> value) throws IOException {
@@ -37,13 +35,16 @@ public class CurrenciesRetrofitClient {
 
             in.beginObject();
             while (in.hasNext()) {
-                currencies.add(ReadCurrency(in));
+                currencies.add(readCurrency(in));
             }
+            in.endObject();
+
             return currencies;
         }
 
-        private String ReadCurrency(JsonReader in) throws IOException {
+        private String readCurrency(JsonReader in) throws IOException {
             String currency = "";
+
             in.beginObject();
             while (in.hasNext()) {
                 String name = in.nextName();
@@ -51,7 +52,33 @@ public class CurrenciesRetrofitClient {
                     currency = in.nextString();
                 }
             }
+            in.endObject();
+
             return currency;
+        }
+    }
+
+    static class CurrencyRankAdapter extends TypeAdapter<Pair<Market, Market>> {
+
+        @Override
+        public void write(JsonWriter out, Pair<Market, Market> value) throws IOException {
+
+        }
+
+        @Override
+        public Pair<Market, Market> read(JsonReader in) throws IOException {
+            Market fromTo = null;
+            Market toFrom = null;
+
+            in.beginObject();
+            while (in.hasNext()) {
+                String name = in.nextName();
+                fromTo = new Market(name.substring(0, 2), name.substring(4, 6), in.nextDouble());
+                name = in.nextName();
+                toFrom = new Market(name.substring(0, 2), name.substring(4, 6), in.nextDouble());
+            }
+
+            return Pair.create(fromTo, toFrom);
         }
     }
 }
