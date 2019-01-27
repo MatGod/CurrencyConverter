@@ -7,9 +7,9 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
-import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 @Dao

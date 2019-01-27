@@ -62,7 +62,6 @@ public class CurrenciesRetrofitClient {
 
         private String readCurrency(JsonReader in) throws IOException {
             String currency = "";
-
             in.beginObject();
             while (in.hasNext()) {
                 in.nextName();

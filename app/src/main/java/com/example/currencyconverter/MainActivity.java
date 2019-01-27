@@ -15,14 +15,19 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -102,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
                     toCurrencyField.setText("0.");
                     toCurrencyField.setSelection(2);
                 }
-                setFromCurrencyValue();
+//                setFromCurrencyValue();
             }
 
             @Override
@@ -135,32 +140,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Market market1 = new Market("USD", "RUB", 1);
-        Market market2 = new Market("RUB", "USD", 2);
 
-        MarketDao db =  Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database").build().marketDao();
 
         CurrenciesRetrofitClient retrofitClient = new CurrenciesRetrofitClient();
         CurrenciesApi api = retrofitClient.provideApi();
-        api.getMarkets().observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(marketsList -> Log.d("TAG", "success"), ex -> ex.printStackTrace());
-//        Market market1 = new Market("USD", "RUB", 1);
-//        Market market2 = new Market("RUB", "USD", 2);
-//
-//        MarketDao db =  Room.databaseBuilder(getApplicationContext(),
-//                AppDatabase.class, "database").build().marketDao();
-//
-//        Completable actionInsert = Completable.fromAction(() -> db.insert(market1));
-//
-//        Disposable dispose = actionInsert
-//                .andThen((SingleSource<List<Market>>) observer -> db.getAll())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .subscribe(markets ->
-//                        Log.d("TAG", String.valueOf(markets.size()))
-//                        , Throwable::printStackTrace);
+
+        AppDatabase db =  Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database").build();
+
+        MarketDao dao = db.marketDao();
+
+        getAllMarketsFromApi(api).subscribe(strings -> { });
+
+        getRankFromApi(api, "USD_PHP,PHP_USD").subscribe(marketsPair -> { });
+
+        getAllMarketsFromDb(dao).subscribe( markets -> {
+            int i = 0;
+        });
+
+        insertMarketToDb(dao, new Market("Pupa", "Lupa", 1)).subscribe(() -> {
+            int i = 0;
+        });
 
     }
 
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                     mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
                             toSpinner.getSelectedItem().toString());
         }
-        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", toValue));
+//        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", toValue));
     }
 
     void setFromCurrencyValue() {
@@ -185,6 +185,31 @@ public class MainActivity extends AppCompatActivity {
                     mCurrencyBank.getExchangeRate(fromSpinner.getSelectedItem().toString(),
                             toSpinner.getSelectedItem().toString());
         }
-        //toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", fromValue));
+//        toCurrencyField.setText(String.format(Locale.getDefault(),"%.2f", fromValue));
     }
+
+    private Single<MarketsList> getAllMarketsFromApi(CurrenciesApi api){
+        return api.getMarkets().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Single<MarketsPair> getRankFromApi(CurrenciesApi api, String currencies){
+        return api.getRank(currencies, "ultra").subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Single<List<Market>> getAllMarketsFromDb(MarketDao dao){
+        return dao.getAll().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Completable insertMarketToDb(MarketDao dao, Market market){
+        return Completable.fromAction(() -> dao.insert(market)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Completable updateMarketInDb(MarketDao dao, Market market){
+        return Completable.fromAction(() -> dao.update(market)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Completable removeMarketFromDb(MarketDao dao, Market market){
+        return Completable.fromAction(() -> dao.delete(market)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
+
 }
