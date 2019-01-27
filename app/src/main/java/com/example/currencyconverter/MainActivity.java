@@ -28,6 +28,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
     private EditText fromCurrencyField;
@@ -93,20 +94,27 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        Market market1 = new Market("USD", "RUB", 1);
-        Market market2 = new Market("RUB", "USD", 2);
 
-        MarketDao db =  Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database").build().marketDao();
-
-        Completable actionInsert = Completable.fromAction(() -> db.insert(market1));
-
-        Disposable dispose = actionInsert.subscribeOn(Schedulers.io())
-                .andThen((SingleSource<List<Market>>) observer -> db.getAll())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(markets ->
-                        Log.d("TAG", String.valueOf(markets.size()))
-                        , Throwable::printStackTrace);
+        CurrenciesRetrofitClient retrofitClient = new CurrenciesRetrofitClient();
+        CurrenciesApi api = retrofitClient.provideApi();
+        api.getMarkets().observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(marketsList -> Log.d("TAG", "success"), ex -> ex.printStackTrace());
+//        Market market1 = new Market("USD", "RUB", 1);
+//        Market market2 = new Market("RUB", "USD", 2);
+//
+//        MarketDao db =  Room.databaseBuilder(getApplicationContext(),
+//                AppDatabase.class, "database").build().marketDao();
+//
+//        Completable actionInsert = Completable.fromAction(() -> db.insert(market1));
+//
+//        Disposable dispose = actionInsert
+//                .andThen((SingleSource<List<Market>>) observer -> db.getAll())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(Schedulers.io())
+//                .subscribe(markets ->
+//                        Log.d("TAG", String.valueOf(markets.size()))
+//                        , Throwable::printStackTrace);
 
     }
 }

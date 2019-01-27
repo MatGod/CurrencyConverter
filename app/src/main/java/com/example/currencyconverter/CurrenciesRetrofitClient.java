@@ -2,6 +2,8 @@ package com.example.currencyconverter;
 
 import android.util.Pair;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -10,28 +12,43 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CurrenciesRetrofitClient {
 
     private Retrofit mRetrofit;
-    private static final String BASE_URL = "free.currencyconverterapi.com/api/v6/";
+    private static final String BASE_URL = "https://free.currencyconverterapi.com/api/v6/";
 
     public CurrenciesRetrofitClient(){
+
+        CurrencyListAdapter currencyListAdapter = new CurrencyListAdapter();
+        CurrencyRankAdapter currencyRankAdapter = new CurrencyRankAdapter();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(MarketsList.class, currencyListAdapter)
+                .registerTypeAdapter(MarketsPair.class, currencyRankAdapter).create();
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
+
     }
 
-    static class CurrencyListAdapter extends TypeAdapter<ArrayList<String>> {
+    public CurrenciesApi provideApi(){
+        return mRetrofit.create(CurrenciesApi.class);
+    }
+
+    static class CurrencyListAdapter extends TypeAdapter<MarketsList> {
 
         @Override
-        public void write(JsonWriter out, ArrayList<String> value) throws IOException {
+        public void write(JsonWriter out, MarketsList value) throws IOException {
 
         }
 
         @Override
-        public ArrayList<String> read(JsonReader in) throws IOException {
-            ArrayList<String> currencies = new ArrayList<>();
+        public MarketsList read(JsonReader in) throws IOException {
+            MarketsList currencies = new MarketsList();
 
             in.beginObject();
             while (in.hasNext()) {
@@ -58,15 +75,15 @@ public class CurrenciesRetrofitClient {
         }
     }
 
-    static class CurrencyRankAdapter extends TypeAdapter<Pair<Market, Market>> {
+    static class CurrencyRankAdapter extends TypeAdapter<MarketsPair> {
 
         @Override
-        public void write(JsonWriter out, Pair<Market, Market> value) throws IOException {
+        public void write(JsonWriter out, MarketsPair value) throws IOException {
 
         }
 
         @Override
-        public Pair<Market, Market> read(JsonReader in) throws IOException {
+        public MarketsPair read(JsonReader in) throws IOException {
             Market fromTo = null;
             Market toFrom = null;
 
@@ -78,7 +95,7 @@ public class CurrenciesRetrofitClient {
                 toFrom = new Market(name.substring(0, 2), name.substring(4, 6), in.nextDouble());
             }
 
-            return Pair.create(fromTo, toFrom);
+            return new MarketsPair(fromTo, toFrom);
         }
     }
 }
