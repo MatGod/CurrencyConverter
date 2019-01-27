@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Конвертер валют</string>
+    <string name="convert_from">Конвретировать из</string>
+    <string name="convert_to">Конвертировать в</string>
+</resources>
