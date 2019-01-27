@@ -1,11 +1,13 @@
 package com.example.currencyconverter;
 
 import android.arch.persistence.room.Room;
+import android.support.annotation.MainThread;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -15,6 +17,17 @@ import org.reactivestreams.Publisher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import io.reactivex.Completable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
     private EditText fromCurrencyField;
@@ -86,9 +99,14 @@ public class MainActivity extends AppCompatActivity {
         MarketDao db =  Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "database").build().marketDao();
 
-//        db.insert(market1).andThen(() -> {
-//            db.delete(market1)
-//        })
+        Completable actionInsert = Completable.fromAction(() -> db.insert(market1));
+
+        Disposable dispose = actionInsert.subscribeOn(Schedulers.io())
+                .andThen((SingleSource<List<Market>>) observer -> db.getAll())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(markets ->
+                        Log.d("TAG", String.valueOf(markets.size()))
+                        , Throwable::printStackTrace);
 
     }
 }

@@ -10,23 +10,24 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 @Dao
 public interface MarketDao {
 
     @Query("SELECT * FROM market")
-    Observable<List<Market>> getAll();
+    Single<List<Market>> getAll();
 
     @Query("SELECT * FROM market WHERE id = :id")
-    Observable<Market> getById(long id);
+    Single<Market> getById(long id);
 
     @Insert
-    Completable insert(Market market);
+    void insert(Market market);
 
     @Update
-    Completable update(Market market);
+    void update(Market market);
 
     @Delete
-    Completable delete(Market market);
+    void delete(Market market);
 
 }

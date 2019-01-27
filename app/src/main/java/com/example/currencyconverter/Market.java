@@ -2,6 +2,7 @@ package com.example.currencyconverter;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public class Market {
     private double price;
 
     @PrimaryKey
+    @NonNull
     private String id = UUID.randomUUID().toString();
 
     public Market(String currencyName, String derivedCurrencyName, double price){
@@ -37,4 +39,19 @@ public class Market {
         return id;
     }
 
+    public void setCurrencyName(String currencyName) {
+        this.currencyName = currencyName;
+    }
+
+    public void setDerivedCurrencyName(String derivedCurrencyName) {
+        this.derivedCurrencyName = derivedCurrencyName;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
